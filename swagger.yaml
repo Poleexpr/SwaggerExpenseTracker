@@ -120,35 +120,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Expense'
-  /categories/{categoryId}/expense/{expenseId}/:
-    get:
-      tags:
-        - expense
-      summary: Найти категорию по ID.
-      description: Возвращает категорию по ID.
-      operationId: getExpenseById
-      parameters:
-        - name: categoryId
-          in: path
-          description: ID запрашиваемой категории
-          required: true
-          schema:
-            type: integer
-            format: int64
-        - name: expenseId
-          in: path
-          description: ID запрашиваемой траты
-          required: true
-          schema:
-            type: integer
-            format: int64
-      responses:
-        '200':
-          description: Возвращает трату
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Expense'
 components:
   schemas:
     Category:
@@ -161,10 +132,6 @@ components:
         title:
           type: string
           example: Food
-        expenses:
-          type: array
-          items:
-            $ref: '#/components/schemas/Expense'
     CategoryRequest:
       type: object
       properties:
