@@ -1,0 +1,203 @@
+openapi: 3.0.4
+info:
+  title: Swagger Expense Tracker - OpenAPI 3.0
+  description: |-
+     Это эндпойнты будущего RESTful-сервера проекта "Трекер трат"
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.12
+servers:
+  - url: https://expensetracker.swagger.io/api/v3
+tags:
+  - name: categories
+    description: Операции с категориями
+  - name: expense
+    description: Операции с тратами
+paths:
+  /categories/:
+    get:
+      tags:
+        - categories
+      summary: Получить все категории.
+      description: Возвращает список всех категорий в формате JSON.
+      operationId: getAllCategories
+      responses:
+        '200':
+          description: Возвращает список категорий
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+    post:
+      tags:
+        - categories
+      summary: Добавить новую категорию.
+      description: Добавляет новую категорию в формате JSON.
+      operationId: addСategory
+      requestBody:
+        description: Принимает title
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryRequest'
+        required: true
+      responses:
+        '200':
+          description: Возвращает созданную категорию
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+  /categories/{categoryId}/:
+    get:
+      tags:
+        - categories
+      summary: Найти категорию по ID.
+      description: Возвращает категорию по ID.
+      operationId: getСategoryById
+      parameters:
+        - name: categoryId
+          in: path
+          description: ID запрашиваемой категории
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Возвращает категорию
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+  /categories/{categoryId}/expenses:
+    get:
+      tags:
+        - expense
+      summary: Получить все затраты.
+      description: Возвращает список всех затрат в формате JSON.
+      parameters:
+        - name: categoryId
+          in: path
+          description: ID запрашиваемой категории
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Возвращает список затрат
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+    post:
+      tags:
+        - expense
+      summary: Добавить новую категорию.
+      description: Добавляет новую трату в формате JSON.
+      operationId: addExpense
+      parameters:
+        - name: categoryId
+          in: path
+          description: ID запрашиваемой категории
+          required: true
+          schema:
+            type: integer
+            format: int64
+      requestBody:
+        description: Принимает title, amount и date
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ExpenseRequest'
+        required: true
+      responses:
+        '200':
+          description: Возвращает трату
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+  /categories/{categoryId}/expense/{expenseId}/:
+    get:
+      tags:
+        - expense
+      summary: Найти категорию по ID.
+      description: Возвращает категорию по ID.
+      operationId: getExpenseById
+      parameters:
+        - name: categoryId
+          in: path
+          description: ID запрашиваемой категории
+          required: true
+          schema:
+            type: integer
+            format: int64
+        - name: expenseId
+          in: path
+          description: ID запрашиваемой траты
+          required: true
+          schema:
+            type: integer
+            format: int64
+      responses:
+        '200':
+          description: Возвращает трату
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Expense'
+components:
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 1
+        title:
+          type: string
+          example: Food
+        expenses:
+          type: array
+          items:
+            $ref: '#/components/schemas/Expense'
+    CategoryRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: Food
+    Expense:
+      type: object
+      properties:
+        id:
+          type: integer
+          format: int64
+          example: 10
+        title:
+          type: string
+          example: milk
+        amount: 
+          type: number
+          format: int64
+          example: 100
+        date: 
+          type: string
+          example: 19.09
+    ExpenseRequest:
+      type: object
+      properties:
+        title:
+          type: string
+          example: milk
+        amount: 
+          type: number
+          format: int64
+          example: 100
+        date: 
+          type: string
+          example: 19.09
