@@ -9,162 +9,180 @@ info:
   version: 1.0.12
 servers:
   - url: https://expensetracker.swagger.io/api/v3
+
 tags:
-  - name: categories
-    description: Операции с категориями
-  - name: expense
+  - name: expenses
     description: Операции с тратами
+
 paths:
-  /categories/:
-    get:
-      tags:
-        - categories
-      summary: Получить все категории.
-      description: Возвращает список всех категорий в формате JSON.
-      operationId: getAllCategories
-      responses:
-        '200':
-          description: Возвращает список категорий
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Category'
+  /expenses:
     post:
-      tags:
-        - categories
-      summary: Добавить новую категорию.
-      description: Добавляет новую категорию в формате JSON.
-      operationId: addСategory
+      tags: [expenses]
+      summary: Добавить новую трату
+      description: Записывает информацию о новой трате в систему
       requestBody:
-        description: Принимает title
+        required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CategoryRequest'
-        required: true
+              $ref: '#/components/schemas/Expense'
       responses:
-        '200':
-          description: Возвращает созданную категорию
+        '201':
+          description: Трата успешно добавлена
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
-  /categories/{categoryId}/:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "Expense added"
+                  expense_id:
+                    type: string
+                    example: "507f1f77bcf86cd799439011"
+        '400':
+          description: Неверный формат данных
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Конечная точка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /top-category:
     get:
-      tags:
-        - categories
-      summary: Найти категорию по ID.
-      description: Возвращает категорию по ID.
-      operationId: getСategoryById
+      tags: [expenses]
+      summary: Получить категорию с наибольшими тратами за месяц
+      description: Возвращает категорию, на которую было потрачено больше всего денег за указанный месяц
       parameters:
-        - name: categoryId
-          in: path
-          description: ID запрашиваемой категории
+        - name: month
+          in: query
+          description: Номер месяца (1-12)
           required: true
           schema:
             type: integer
-            format: int64
+            minimum: 1
+            maximum: 12
+            example: 5
       responses:
         '200':
-          description: Возвращает категорию
+          description: Успешный запрос
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Category'
-  /categories/{categoryId}/expenses:
+                type: object
+                properties:
+                  category:
+                    type: string
+                    example: "Еда"
+                  total:
+                    type: number
+                    format: float
+                    example: 12500.50
+        '400':
+          description: Неверный параметр месяца
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Данные не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /largest-expense:
     get:
-      tags:
-        - expense
-      summary: Получить все затраты.
-      description: Возвращает список всех затрат в формате JSON.
+      tags: [expenses]
+      summary: Получить самую крупную трату
+      description: Возвращает самую крупную трату за указанный месяц и/или в указанной категории
       parameters:
-        - name: categoryId
-          in: path
-          description: ID запрашиваемой категории
-          required: true
+        - name: month
+          in: query
+          description: Номер месяца (1-12)
+          required: false
           schema:
             type: integer
-            format: int64
+            minimum: 1
+            maximum: 12
+            example: 5
+        - name: category
+          in: query
+          description: Название категории
+          required: false
+          schema:
+            type: string
+            example: "Еда"
       responses:
         '200':
-          description: Возвращает список затрат
+          description: Успешный запрос
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Expense'
-    post:
-      tags:
-        - expense
-      summary: Добавить новую категорию.
-      description: Добавляет новую трату в формате JSON.
-      operationId: addExpense
-      parameters:
-        - name: categoryId
-          in: path
-          description: ID запрашиваемой категории
-          required: true
-          schema:
-            type: integer
-            format: int64
-      requestBody:
-        description: Принимает title, amount и date
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ExpenseRequest'
-        required: true
-      responses:
-        '200':
-          description: Возвращает трату
+                type: object
+                properties:
+                  description:
+                    type: string
+                    example: "Продукты на неделю"
+                  category:
+                    type: string
+                    example: "Еда"
+                  amount:
+                    type: number
+                    format: float
+                    example: 5500.75
+                  date:
+                    type: string
+                    example: "04.05"
+        '400':
+          description: Неверные параметры запроса
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Expense'
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Данные не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
 components:
   schemas:
-    Category:
-      type: object
-      properties:
-        id:
-          type: integer
-          format: int64
-          example: 1
-        title:
-          type: string
-          example: Food
-    CategoryRequest:
-      type: object
-      properties:
-        title:
-          type: string
-          example: Food
     Expense:
       type: object
+      required:
+        - description
+        - category
+        - amount
+        - date
       properties:
-        id:
-          type: integer
-          format: int64
-          example: 10
-        title:
+        description:
           type: string
-          example: milk
-        amount: 
+          description: Описание траты
+          example: "Молоко"
+        category:
+          type: string
+          description: Категория траты
+          example: "Еда"
+        amount:
           type: number
-          format: int64
-          example: 100
-        date: 
+          format: float
+          description: Сумма траты
+          example: 110.00
+        date:
           type: string
-          example: 19.09
-    ExpenseRequest:
+          description: Дата в формате ДД.ММ
+          example: "04.05"
+    Error:
       type: object
       properties:
-        title:
+        error:
           type: string
-          example: milk
-        amount: 
-          type: number
-          format: int64
-          example: 100
-        date: 
-          type: string
-          example: 19.09
+          description: Описание ошибки
+          example: "Invalid data format"
