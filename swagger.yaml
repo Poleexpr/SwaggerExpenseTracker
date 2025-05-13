@@ -52,105 +52,105 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
+    /largest:
+      get:
+        tags: [expenses]
+        summary: Получить самую крупную трату
+        description: Возвращает самую крупную трату за указанный месяц и в указанной категории
+        parameters:
+          - name: month
+            in: query
+            description: Номер месяца (1-12)
+            required: false
+            schema:
+              type: integer
+              minimum: 1
+              maximum: 12
+              example: 5
+          - name: category
+            in: query
+            description: Название категории
+            required: false
+            schema:
+              type: string
+              example: "Еда"
+        responses:
+          '200':
+            description: Успешный запрос
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    description:
+                      type: string
+                      example: "Продукты на неделю"
+                    category:
+                      type: string
+                      example: "Еда"
+                    amount:
+                      type: number
+                      format: float
+                      example: 5500.75
+                    date:
+                      type: string
+                      example: "04.05"
+          '400':
+            description: Неверные параметры запроса
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+          '404':
+            description: Данные не найдены
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
 
-  /top-category:
-    get:
-      tags: [expenses]
-      summary: Получить категорию с наибольшими тратами за месяц
-      description: Возвращает категорию, на которую было потрачено больше всего денег за указанный месяц
-      parameters:
-        - name: month
-          in: query
-          description: Номер месяца (1-12)
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 12
-            example: 5
-      responses:
-        '200':
-          description: Успешный запрос
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  category:
-                    type: string
-                    example: "Еда"
-                  total:
-                    type: number
-                    format: float
-                    example: 12500.50
-        '400':
-          description: Неверный параметр месяца
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Данные не найдены
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-
-  /largest-expense:
-    get:
-      tags: [expenses]
-      summary: Получить самую крупную трату
-      description: Возвращает самую крупную трату за указанный месяц и в указанной категории
-      parameters:
-        - name: month
-          in: query
-          description: Номер месяца (1-12)
-          required: false
-          schema:
-            type: integer
-            minimum: 1
-            maximum: 12
-            example: 5
-        - name: category
-          in: query
-          description: Название категории
-          required: false
-          schema:
-            type: string
-            example: "Еда"
-      responses:
-        '200':
-          description: Успешный запрос
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  description:
-                    type: string
-                    example: "Продукты на неделю"
-                  category:
-                    type: string
-                    example: "Еда"
-                  amount:
-                    type: number
-                    format: float
-                    example: 5500.75
-                  date:
-                    type: string
-                    example: "04.05"
-        '400':
-          description: Неверные параметры запроса
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
-        '404':
-          description: Данные не найдены
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Error'
+  /categories:
+    /top:
+      get:
+        tags: [categories]
+        summary: Получить категорию с наибольшими тратами за месяц
+        description: Возвращает категорию, на которую было потрачено больше всего денег за указанный месяц
+        parameters:
+          - name: month
+            in: query
+            description: Номер месяца (1-12)
+            required: true
+            schema:
+              type: integer
+              minimum: 1
+              maximum: 12
+              example: 5
+        responses:
+          '200':
+            description: Успешный запрос
+            content:
+              application/json:
+                schema:
+                  type: object
+                  properties:
+                    category:
+                      type: string
+                      example: "Еда"
+                    total:
+                      type: number
+                      format: float
+                      example: 12500.50
+          '400':
+            description: Неверный параметр месяца
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
+          '404':
+            description: Данные не найдены
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Error'
 
 components:
   schemas:
