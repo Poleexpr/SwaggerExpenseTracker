@@ -52,7 +52,7 @@ paths:
     get:
       tags: [expenses]
       summary: Получить самую крупную трату
-      description: Возвращает самую крупную трату за указанный период
+      description: Возвращает самую крупную трату за указанный месяц и в указанной категории
       parameters:
         - name: month
           in: query
@@ -93,8 +93,8 @@ paths:
   /categories/top:
     get:
       tags: [categories]
-      summary: Получить топовую категорию
-      description: Возвращает категорию с наибольшими тратами за месяц
+      summary: Получить категорию с наибольшими тратами за месяц
+      description: Возвращает категорию, на которую было потрачено больше всего денег за указанный месяц
       parameters:
         - name: month
           in: query
