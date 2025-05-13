@@ -2,7 +2,7 @@ openapi: 3.0.4
 info:
   title: Swagger Expense Tracker - OpenAPI 3.0
   description: |-
-     Это эндпойнты будущего RESTful-сервера проекта "Трекер трат"
+    Это эндпойнты будущего RESTful-сервера проекта "Трекер трат"
   license:
     name: Apache 2.0
     url: https://www.apache.org/licenses/LICENSE-2.0.html
@@ -13,6 +13,8 @@ servers:
 tags:
   - name: expenses
     description: Операции с тратами
+  - name: categories
+    description: Операции с категориями трат
 
 paths:
   /expenses:
@@ -28,129 +30,100 @@ paths:
               $ref: '#/components/schemas/Expense'
       responses:
         '201':
-          description: Трата успешно добавлена
+          description: Трата успешно создана
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  status:
-                    type: string
-                    example: "Expense added"
-                  expense_id:
-                    type: string
-                    example: "507f1f77bcf86cd799439011"
+                $ref: '#/components/schemas/ExpenseCreatedResponse'
         '400':
           description: Неверный формат данных
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-        '404':
-          description: Конечная точка не найдена
+        '500':
+          description: Внутренняя ошибка сервера
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Error'
-    /largest:
-      get:
-        tags: [expenses]
-        summary: Получить самую крупную трату
-        description: Возвращает самую крупную трату за указанный месяц и в указанной категории
-        parameters:
-          - name: month
-            in: query
-            description: Номер месяца (1-12)
-            required: false
-            schema:
-              type: integer
-              minimum: 1
-              maximum: 12
-              example: 5
-          - name: category
-            in: query
-            description: Название категории
-            required: false
-            schema:
-              type: string
-              example: "Еда"
-        responses:
-          '200':
-            description: Успешный запрос
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    description:
-                      type: string
-                      example: "Продукты на неделю"
-                    category:
-                      type: string
-                      example: "Еда"
-                    amount:
-                      type: number
-                      format: float
-                      example: 5500.75
-                    date:
-                      type: string
-                      example: "04.05"
-          '400':
-            description: Неверные параметры запроса
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
-          '404':
-            description: Данные не найдены
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
 
-  /categories:
-    /top:
-      get:
-        tags: [categories]
-        summary: Получить категорию с наибольшими тратами за месяц
-        description: Возвращает категорию, на которую было потрачено больше всего денег за указанный месяц
-        parameters:
-          - name: month
-            in: query
-            description: Номер месяца (1-12)
-            required: true
-            schema:
-              type: integer
-              minimum: 1
-              maximum: 12
-              example: 5
-        responses:
-          '200':
-            description: Успешный запрос
-            content:
-              application/json:
-                schema:
-                  type: object
-                  properties:
-                    category:
-                      type: string
-                      example: "Еда"
-                    total:
-                      type: number
-                      format: float
-                      example: 12500.50
-          '400':
-            description: Неверный параметр месяца
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
-          '404':
-            description: Данные не найдены
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Error'
+  /expenses/largest:
+    get:
+      tags: [expenses]
+      summary: Получить самую крупную трату
+      description: Возвращает самую крупную трату за указанный период
+      parameters:
+        - name: month
+          in: query
+          description: Номер месяца (1-12)
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            example: 5
+        - name: category
+          in: query
+          description: Название категории
+          required: false
+          schema:
+            type: string
+            example: "Еда"
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LargestExpenseResponse'
+        '400':
+          description: Неверные параметры запроса
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Данные не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /categories/top:
+    get:
+      tags: [categories]
+      summary: Получить топовую категорию
+      description: Возвращает категорию с наибольшими тратами за месяц
+      parameters:
+        - name: month
+          in: query
+          description: Номер месяца (1-12)
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 12
+            example: 5
+      responses:
+        '200':
+          description: Успешный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TopCategoryResponse'
+        '400':
+          description: Неверный параметр месяца
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Данные не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
 
 components:
   schemas:
@@ -173,16 +146,76 @@ components:
         amount:
           type: number
           format: float
+          minimum: 0.01
           description: Сумма траты
           example: 110.00
         date:
           type: string
+          format: date
           description: Дата в формате ДД.ММ
           example: "04.05"
+    
+    ExpenseCreatedResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        links:
+          type: object
+          properties:
+            self:
+              type: string
+              example: "/expenses/507f1f77bcf86cd799439011"
+    
+    LargestExpenseResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "507f1f77bcf86cd799439011"
+        description:
+          type: string
+          example: "Продукты на неделю"
+        category:
+          type: string
+          example: "Еда"
+        amount:
+          type: number
+          format: float
+          example: 5500.75
+        date:
+          type: string
+          format: date
+          example: "2023-05-04"
+    
+    TopCategoryResponse:
+      type: object
+      properties:
+        category:
+          type: string
+          example: "Еда"
+        total:
+          type: number
+          format: float
+          example: 12500.50
+        period:
+          type: string
+          example: "2023-05"
+    
     Error:
       type: object
       properties:
         error:
           type: string
+          description: Код ошибки
+          example: "invalid_data"
+        message:
+          type: string
           description: Описание ошибки
-          example: "Invalid data format"
+          example: "Неверный формат данных"
+        details:
+          type: array
+          items:
+            type: string
+          example: ["Поле 'amount' должно быть положительным числом"]
